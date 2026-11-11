@@ -263,4 +263,124 @@ public interface ContainerViewerConfig extends Config
 	{
 		return true;
 	}
+
+	@ConfigItem(
+		keyName = "gemPouch",
+		name = "Gem pouch",
+		description = "Gem pouch and gem sack",
+		section = containersSection,
+		position = 116
+	)
+	default boolean gemPouch()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "essencePouch",
+		name = "Essence pouch",
+		description = "Essence pouches, small to colossal",
+		section = containersSection,
+		position = 117
+	)
+	default boolean essencePouch()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "meatPouch",
+		name = "Meat pouch",
+		description = "Hunter guild meat pouch, both sizes",
+		section = containersSection,
+		position = 118
+	)
+	default boolean meatPouch()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "furPouch",
+		name = "Fur pouch",
+		description = "Hunter guild fur pouch, all three sizes",
+		section = containersSection,
+		position = 119
+	)
+	default boolean furPouch()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "seedSack",
+		name = "Seed sack",
+		description = "Hunter guild seed sack",
+		section = containersSection,
+		position = 120
+	)
+	default boolean seedSack()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "scrollSack",
+		name = "Scroll sack",
+		description = "Scroll sack",
+		section = containersSection,
+		position = 121
+	)
+	default boolean scrollSack()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "foragersPouch",
+		name = "Forager's pouch",
+		description = "Forager's pouch",
+		section = containersSection,
+		position = 122
+	)
+	default boolean foragersPouch()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "clothesPouch",
+		name = "Clothes pouch",
+		description = "Forestry clothes pouch",
+		section = containersSection,
+		position = 123
+	)
+	default boolean clothesPouch()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "capePouch",
+		name = "Cape pouch",
+		description = "Forestry cape pouch",
+		section = containersSection,
+		position = 124
+	)
+	default boolean capePouch()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "secondaryPouch",
+		name = "Secondary pouch",
+		description = "Mastering Mixology secondary pouch",
+		section = containersSection,
+		position = 125
+	)
+	default boolean secondaryPouch()
+	{
+		return true;
+	}
 }

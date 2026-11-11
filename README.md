@@ -5,7 +5,13 @@ with a setting to turn each one on or off.
 Containers:
 - Looting bag, seed box, tackle box, forestry kit, huntsman's kit, Dizana's quiver, barbarian knapsack
 - Rune pouch (divine included), plank sack
-- Herb sack (silklined included), gem bag, coal bag, fish barrel, log basket, forestry basket, flamtaer bag
+- Herb sack (silklined included), gem bag, coal bag, fish barrel (fish sack barrel included),
+  log basket, forestry basket, flamtaer bag, gem pouch and gem sack, essence pouches (small to
+  colossal), hunter guild meat pouch, fur pouch and seed sack, scroll sack, forager's pouch,
+  forestry clothes pouch, forestry cape pouch, Mastering Mixology secondary pouch
+
+The bolt pouch and the druid pouch are left out: the bolt pouch has its own interface and the client
+is never told which bolts are in which slot, and the druid pouch holds charges rather than items.
 
 How much the client knows depends on the container:
 - The rune pouch and the plank sack are kept in varbits, so those are always exact.

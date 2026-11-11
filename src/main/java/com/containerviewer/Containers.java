@@ -66,6 +66,12 @@ final class Containers
 		ItemID.REDWOOD_LOGS, ItemID.ACHEY_TREE_LOGS,
 	};
 
+	/** Rune, pure, daeyalt and guardian essence are all the essence pouch takes. */
+	private static final int[] ESSENCE = {
+		ItemID.BLANKRUNE, ItemID.BLANKRUNE_HIGH, ItemID.BLANKRUNE_DAEYALT,
+		ItemID.GOTR_GUARDIAN_ESSENCE,
+	};
+
 	private static final int[] TEMPLE_MATERIALS = {
 		ItemID.LIMESTONEBRICK, ItemID.SOFTCLAY, ItemID.SWAMPPASTE, ItemID.TIMBERBEAM,
 	};
@@ -100,10 +106,19 @@ final class Containers
 				ItemID.HUNTSMANS_KIT)
 			.build());
 
+		// Every quiver variant, including the max capes, which are the same container
 		all.add(Container.container("quiver", "Dizana's quiver", InventoryID.DIZANAS_QUIVER_AMMO,
 				ItemID.DIZANAS_QUIVER_UNCHARGED, ItemID.DIZANAS_QUIVER_UNCHARGED_TROUVER,
 				ItemID.DIZANAS_QUIVER_CHARGED, ItemID.DIZANAS_QUIVER_CHARGED_TROUVER,
-				ItemID.DIZANAS_QUIVER_INFINITE, ItemID.DIZANAS_QUIVER_INFINITE_TROUVER)
+				ItemID.DIZANAS_QUIVER_INFINITE, ItemID.DIZANAS_QUIVER_INFINITE_TROUVER,
+				ItemID.DIZANAS_QUIVER_BROKEN, ItemID.DIZANAS_QUIVER_INFINITE_BROKEN,
+				ItemID.DIZANAS_QUIVER_TROUVER_BROKEN, ItemID.DIZANAS_QUIVER_TROUVER_MANGLED,
+				ItemID.DIZANAS_QUIVER_INFINITE_TROUVER_BROKEN,
+				ItemID.DIZANAS_QUIVER_INFINITE_TROUVER_MANGLED,
+				ItemID.SKILLCAPE_MAX_DIZANAS, ItemID.SKILLCAPE_MAX_HOOD_DIZANAS,
+				ItemID.SKILLCAPE_MAX_DIZANAS_BROKEN, ItemID.SKILLCAPE_MAX_DIZANAS_TROUVER,
+				ItemID.SKILLCAPE_MAX_DIZANAS_TROUVER_BROKEN,
+				ItemID.SKILLCAPE_MAX_DIZANAS_TROUVER_MANGLED)
 			.build());
 
 		all.add(Container.container("knapsack", "Barbarian knapsack", InventoryID.BARBARIAN_KNAPSACK,
@@ -147,8 +162,9 @@ final class Containers
 
 		all.add(Container.chat("fishBarrel", "Fish barrel",
 				ItemID.FISH_BARREL_CLOSED, ItemID.FISH_BARREL_OPEN)
-			.openWhen(ItemID.FISH_BARREL_OPEN)
+			.openWhen(ItemID.FISH_BARREL_OPEN, ItemID.FISH_SACK_BARREL_OPEN)
 			.holding(28)
+			.upgrade(56, 0, ItemID.FISH_SACK_BARREL_CLOSED, ItemID.FISH_SACK_BARREL_OPEN)
 			.build());
 
 		all.add(Container.chat("logBasket", "Log basket",
@@ -162,6 +178,60 @@ final class Containers
 		all.add(Container.chat("flamtaerBag", "Flamtaer bag",
 				ItemID.FLAMTAER_BAG)
 			.accepts(TEMPLE_MATERIALS)
+			.build());
+
+		all.add(Container.chat("gemPouch", "Gem pouch",
+				ItemID.GEM_POUCH, ItemID.GEM_POUCH_OPEN)
+			.accepts(GEMS)
+			.openWhen(ItemID.GEM_POUCH_OPEN, ItemID.GEM_SACK_OPEN)
+			.upgrade(0, 0, ItemID.GEM_SACK, ItemID.GEM_SACK_OPEN)
+			.build());
+
+		all.add(Container.chat("essencePouch", "Essence pouch",
+				ItemID.RCU_POUCH_SMALL, ItemID.RCU_POUCH_MEDIUM, ItemID.RCU_POUCH_MEDIUM_DEGRADE,
+				ItemID.RCU_POUCH_LARGE, ItemID.RCU_POUCH_LARGE_DEGRADE,
+				ItemID.RCU_POUCH_GIANT, ItemID.RCU_POUCH_GIANT_DEGRADE,
+				ItemID.RCU_POUCH_COLOSSAL, ItemID.RCU_POUCH_COLOSSAL_DEGRADE)
+			.accepts(ESSENCE)
+			.build());
+
+		all.add(Container.chat("meatPouch", "Meat pouch",
+				ItemID.HG_MEATPOUCH_SMALL, ItemID.HG_MEATPOUCH_SMALL_OPEN)
+			.openWhen(ItemID.HG_MEATPOUCH_SMALL_OPEN, ItemID.HG_MEATPOUCH_LARGE_OPEN)
+			.upgrade(0, 0, ItemID.HG_MEATPOUCH_LARGE, ItemID.HG_MEATPOUCH_LARGE_OPEN)
+			.build());
+
+		all.add(Container.chat("furPouch", "Fur pouch",
+				ItemID.HG_FURPOUCH_SMALL, ItemID.HG_FURPOUCH_SMALL_OPEN,
+				ItemID.HG_FURPOUCH_MED, ItemID.HG_FURPOUCH_MED_OPEN)
+			.openWhen(ItemID.HG_FURPOUCH_SMALL_OPEN, ItemID.HG_FURPOUCH_MED_OPEN,
+				ItemID.HG_FURPOUCH_LARGE_OPEN)
+			.upgrade(0, 0, ItemID.HG_FURPOUCH_LARGE, ItemID.HG_FURPOUCH_LARGE_OPEN)
+			.build());
+
+		all.add(Container.chat("seedSack", "Seed sack",
+				ItemID.HG_SEEDSACK)
+			.build());
+
+		all.add(Container.chat("scrollSack", "Scroll sack",
+				ItemID.SCROLL_SACK)
+			.build());
+
+		all.add(Container.chat("foragersPouch", "Forager's pouch",
+				ItemID.FORAGERS_POUCH)
+			.build());
+
+		all.add(Container.chat("clothesPouch", "Clothes pouch",
+				ItemID.FORESTRY_CLOTHES_POUCH)
+			.build());
+
+		all.add(Container.chat("capePouch", "Cape pouch",
+				ItemID.FORESTRY_CAPE_POUCH)
+			.build());
+
+		all.add(Container.chat("secondaryPouch", "Secondary pouch",
+				ItemID.MM_SECONDARY_POUCH, ItemID.MM_SECONDARY_POUCH_OPEN)
+			.openWhen(ItemID.MM_SECONDARY_POUCH_OPEN)
 			.build());
 
 		return all;
