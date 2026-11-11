@@ -50,6 +50,13 @@ public class ContainerViewerPlugin extends Plugin
 	/** Where the bolt slot numbers the pouch has given away are kept. */
 	private static final String BOLT_SLOTS_KEY = "boltSlots";
 
+	/** Set once the rename has been explained, so it is only ever said one time. */
+	private static final String RENAME_NOTICE_KEY = "renameNotice";
+
+	private static final String RENAME_NOTICE =
+		"Looting Bag Viewer is now Container Viewer: it shows the contents of every container in "
+			+ "the game, with a toggle for each one in the plugin settings.";
+
 	/** Clicks on the container itself that move things rather than list them. */
 	private static final String FILL = "Fill";
 	private static final String EMPTY = "Empty";
@@ -154,6 +161,25 @@ public class ContainerViewerPlugin extends Plugin
 		{
 			inventory = new HashMap<>();
 		}
+
+		if (event.getGameState() == GameState.LOGGED_IN)
+		{
+			sayRenameOnce();
+		}
+	}
+
+	/** Tells the player the plugin used to be called something else, the first time they log in. */
+	private void sayRenameOnce()
+	{
+		Boolean said = configManager.getConfiguration(ContainerViewerConfig.GROUP,
+			RENAME_NOTICE_KEY, Boolean.class);
+		if (said != null && said)
+		{
+			return;
+		}
+
+		configManager.setConfiguration(ContainerViewerConfig.GROUP, RENAME_NOTICE_KEY, true);
+		client.addChatMessage(ChatMessageType.CONSOLE, "", RENAME_NOTICE, null);
 	}
 
 	@Subscribe
