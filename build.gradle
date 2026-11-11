@@ -14,7 +14,7 @@ repositories {
 }
 
 def runeLiteVersion = 'latest.release'
-def pluginMainClass = 'com.lootingbagviewer.LootingBagViewerPluginTest'
+def pluginMainClass = 'com.containerviewer.ContainerViewerPluginTest'
 
 dependencies {
 	compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
@@ -27,7 +27,7 @@ dependencies {
 	testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
 }
 
-group = 'com.lootingbagviewer'
+group = 'com.containerviewer'
 
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = 'UTF-8'

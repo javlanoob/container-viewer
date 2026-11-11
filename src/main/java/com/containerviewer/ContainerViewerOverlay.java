@@ -1,4 +1,4 @@
-package com.lootingbagviewer;
+package com.containerviewer;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -14,8 +14,6 @@ import net.runelite.api.Constants;
 import net.runelite.api.Item;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.MenuEntry;
-import net.runelite.api.gameval.InterfaceID;
-import net.runelite.api.gameval.ItemID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.config.RuneLiteConfig;
 import net.runelite.client.game.ItemManager;
@@ -30,7 +28,7 @@ import net.runelite.client.ui.overlay.tooltip.Tooltip;
 import net.runelite.client.ui.overlay.tooltip.TooltipManager;
 import net.runelite.client.util.QuantityFormatter;
 
-class LootingBagViewerOverlay extends Overlay
+class ContainerViewerOverlay extends Overlay
 {
 	private static final Color HINT_COLOR = Color.LIGHT_GRAY;
 	private static final int PANEL_BORDER = 4;
@@ -38,8 +36,8 @@ class LootingBagViewerOverlay extends Overlay
 	private static final int MAX_COLUMNS = 4;
 
 	private final Client client;
-	private final LootingBagViewerPlugin plugin;
-	private final LootingBagViewerConfig config;
+	private final ContainerViewerPlugin plugin;
+	private final ContainerViewerConfig config;
 	private final ItemManager itemManager;
 	private final TooltipManager tooltipManager;
 	private final RuneLiteConfig runeLiteConfig;
@@ -47,11 +45,14 @@ class LootingBagViewerOverlay extends Overlay
 	private final PanelComponent panel = new PanelComponent();
 	private final PanelComponent grid = new PanelComponent();
 	private final Tooltip tooltip = new Tooltip(panel);
-	private boolean hovering;
+
+	/** What the panel was last built for, so it is built once per hover rather than once per frame. */
+	private Container showing;
+	private int showingItem;
 	private boolean dirty = true;
 
 	@Inject
-	LootingBagViewerOverlay(Client client, LootingBagViewerPlugin plugin, LootingBagViewerConfig config,
+	ContainerViewerOverlay(Client client, ContainerViewerPlugin plugin, ContainerViewerConfig config,
 		ItemManager itemManager, TooltipManager tooltipManager, RuneLiteConfig runeLiteConfig)
 	{
 		this.client = client;
@@ -81,25 +82,29 @@ class LootingBagViewerOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
-		if (!isHoveringLootingBag())
+		int hovered = hoveredContainerItem();
+		Container container = hovered == -1 ? null : Containers.of(hovered);
+
+		if (container == null)
 		{
-			hovering = false;
+			showing = null;
 			return null;
 		}
 
-		// Rebuild when the hover starts so prices and config changes are picked up,
-		// without doing the work every frame while the mouse rests on the bag
-		if (!hovering || dirty)
+		// Rebuild when the hover starts so prices and config changes are picked up, without doing
+		// the work every frame while the mouse rests on the item
+		if (container != showing || hovered != showingItem || dirty)
 		{
-			rebuild(graphics);
-			hovering = true;
+			rebuild(graphics, container, hovered);
+			showing = container;
+			showingItem = hovered;
 			dirty = false;
 		}
 
 		if (config.showOnTop())
 		{
-			// This overlay renders before Mouse Highlighting, which also adds to the front,
-			// so the contents sit right below the "Close Looting bag" text instead of under other plugins' tooltips
+			// This overlay renders before Mouse Highlighting, which also adds to the front, so the
+			// contents sit right below the hover text instead of under other plugins' tooltips
 			tooltipManager.addFront(tooltip);
 		}
 		else
@@ -109,46 +114,58 @@ class LootingBagViewerOverlay extends Overlay
 		return null;
 	}
 
-	private boolean isHoveringLootingBag()
+	/** The container item under the mouse, or -1 if that is not what the mouse is over. */
+	private int hoveredContainerItem()
 	{
-		// Runs every frame, so bail out cheaply for the common case of not carrying a bag.
-		// The bag's own interface already shows its contents, so stay out of the way while it's open
-		if (!plugin.isBagInInventory() || client.isMenuOpen() || isLootingBagInterfaceOpen())
+		// Runs every frame, so this stays as cheap as it can be
+		if (client.isMenuOpen())
 		{
-			return false;
+			return -1;
 		}
 
 		MenuEntry[] entries = client.getMenu().getMenuEntries();
 		if (entries.length == 0)
 		{
-			return false;
+			return -1;
 		}
 
-		// Only item widgets (inventory, bank side inventory, etc.), not a bag lying on the ground
+		// Only item widgets (inventory, bank side inventory, etc.), not one lying on the ground
 		Widget widget = entries[entries.length - 1].getWidget();
 		if (widget == null)
 		{
-			return false;
+			return -1;
 		}
 
 		int itemId = widget.getItemId();
-		return itemId == ItemID.LOOTING_BAG || itemId == ItemID.LOOTING_BAG_OPEN;
+		Container container = Containers.of(itemId);
+		if (container == null || !plugin.enabled(container) || isOwnInterfaceOpen(container))
+		{
+			return -1;
+		}
+
+		return itemId;
 	}
 
-	private boolean isLootingBagInterfaceOpen()
+	/** Whether the container's own interface is open, since that already shows what is in it. */
+	private boolean isOwnInterfaceOpen(Container container)
 	{
-		Widget bagInterface = client.getWidget(InterfaceID.WildernessLootingbag.UNIVERSE);
-		return bagInterface != null && !bagInterface.isHidden();
+		if (container.interfaceId == 0)
+		{
+			return false;
+		}
+
+		Widget widget = client.getWidget(container.interfaceId);
+		return widget != null && !widget.isHidden();
 	}
 
-	private void rebuild(Graphics2D graphics)
+	private void rebuild(Graphics2D graphics, Container container, int hovered)
 	{
 		panel.getChildren().clear();
 
-		List<Item> contents = plugin.getContents();
+		List<Item> contents = plugin.getContents(container);
 		if (contents == null)
 		{
-			addHint(graphics, "Check");
+			addHint(graphics, container.source == Container.Source.CHAT ? "Check" : "Open");
 			return;
 		}
 
@@ -161,6 +178,7 @@ class LootingBagViewerOverlay extends Overlay
 		List<Stack> stacks = new ArrayList<>(contents.size());
 		long total = 0;
 		long alchTotal = 0;
+		int items = 0;
 		for (Item item : contents)
 		{
 			ItemComposition composition = itemManager.getItemComposition(item.getId());
@@ -168,6 +186,7 @@ class LootingBagViewerOverlay extends Overlay
 			stacks.add(new Stack(item, value, composition.isStackable()));
 			total += value;
 			alchTotal += (long) composition.getHaPrice() * item.getQuantity();
+			items += item.getQuantity();
 		}
 
 		if (config.sortByValue())
@@ -180,22 +199,28 @@ class LootingBagViewerOverlay extends Overlay
 		int gridWidth = columns * Constants.ITEM_SPRITE_WIDTH + (columns - 1) * ICON_GAP;
 		grid.setPreferredSize(new Dimension(gridWidth, 0));
 
-		// Label the totals only when both are shown, so a single total stays as compact as before
+		List<String> lines = new ArrayList<>(3);
+		int capacity = container.capacity(hovered);
+		if (config.showFill() && capacity > 0)
+		{
+			lines.add(items + " / " + capacity);
+		}
+
+		// Label the totals only when both are shown, so a single total stays compact
 		boolean showPrices = config.showPrices();
 		boolean showHighAlch = config.showHighAlch();
 		boolean labelled = showPrices && showHighAlch;
-		List<String> totals = new ArrayList<>(2);
 		if (showPrices)
 		{
-			totals.add((labelled ? "GE: " : "") + QuantityFormatter.quantityToStackSize(total) + " gp");
+			lines.add((labelled ? "GE: " : "") + QuantityFormatter.quantityToStackSize(total) + " gp");
 		}
 		if (showHighAlch)
 		{
-			totals.add("HA: " + QuantityFormatter.quantityToStackSize(alchTotal) + " gp");
+			lines.add("HA: " + QuantityFormatter.quantityToStackSize(alchTotal) + " gp");
 		}
 
 		int contentWidth = gridWidth;
-		for (String text : totals)
+		for (String text : lines)
 		{
 			contentWidth = Math.max(contentWidth, textWidth(graphics, text));
 		}
@@ -205,11 +230,12 @@ class LootingBagViewerOverlay extends Overlay
 		for (Stack stack : stacks)
 		{
 			Item item = stack.item;
-			grid.getChildren().add(new ImageComponent(itemManager.getImage(item.getId(), item.getQuantity(), stack.stackable)));
+			grid.getChildren().add(new ImageComponent(
+				itemManager.getImage(item.getId(), item.getQuantity(), stack.stackable)));
 		}
 		panel.getChildren().add(grid);
 
-		for (String text : totals)
+		for (String text : lines)
 		{
 			panel.getChildren().add(LineComponent.builder()
 				.left(text)
