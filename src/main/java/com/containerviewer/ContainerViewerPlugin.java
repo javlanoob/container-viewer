@@ -124,6 +124,9 @@ public class ContainerViewerPlugin extends Plugin
 	/** Item names from listings, worked out once each. */
 	private final Map<String, Integer> itemsByName = new HashMap<>();
 
+	/** Whether the rename is still waiting to be said. */
+	private boolean noticePending;
+
 	@Override
 	protected void startUp()
 	{
@@ -164,20 +167,17 @@ public class ContainerViewerPlugin extends Plugin
 
 		if (event.getGameState() == GameState.LOGGED_IN)
 		{
-			sayRenameOnce();
+			// Said on the first tick instead of here, where the chat is not ready to take it yet
+			Boolean said = configManager.getConfiguration(ContainerViewerConfig.GROUP,
+				RENAME_NOTICE_KEY, Boolean.class);
+			noticePending = said == null || !said;
 		}
 	}
 
-	/** Tells the player the plugin used to be called something else, the first time they log in. */
+	/** Tells the player the plugin used to be called something else, the one time. */
 	private void sayRenameOnce()
 	{
-		Boolean said = configManager.getConfiguration(ContainerViewerConfig.GROUP,
-			RENAME_NOTICE_KEY, Boolean.class);
-		if (said != null && said)
-		{
-			return;
-		}
-
+		noticePending = false;
 		configManager.setConfiguration(ContainerViewerConfig.GROUP, RENAME_NOTICE_KEY, true);
 		client.addChatMessage(ChatMessageType.CONSOLE, "", RENAME_NOTICE, null);
 	}
@@ -448,6 +448,11 @@ public class ContainerViewerPlugin extends Plugin
 	{
 		int tick = client.getTickCount();
 
+		if (noticePending)
+		{
+			sayRenameOnce();
+		}
+
 		// The bolt pouch only says which bolt a slot holds while it is open
 		BoltPouch boltPouch = Containers.boltPouch();
 		if (boltPouch.isOpen(client) && boltPouch.learn(client))
@@ -650,6 +655,7 @@ public class ContainerViewerPlugin extends Plugin
 
 	private void clearPending()
 	{
+		noticePending = false;
 		reading = null;
 		readingItems = null;
 		awaiting = null;

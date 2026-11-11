@@ -43,7 +43,7 @@ final class Container
 	/** CONTAINER: the item container the server sends it in. */
 	final int inventoryId;
 
-	/** CONTAINER: an interface of its own which already shows the contents, if it has one. */
+	/** An interface of its own which already shows the contents, if it has one. */
 	final int interfaceId;
 
 	/** VARBITS: how to read the slots. */
