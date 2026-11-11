@@ -25,7 +25,8 @@ final class Container
 
 	interface VarbitContents
 	{
-		void read(Client client, Map<Integer, Integer> out);
+		/** Reads the contents, and returns false when they cannot all be worked out. */
+		boolean read(Client client, Map<Integer, Integer> out);
 	}
 
 	/** Config key and storage key, so renaming one of these would forget what it held. */

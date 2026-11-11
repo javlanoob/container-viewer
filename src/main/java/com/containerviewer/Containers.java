@@ -76,6 +76,9 @@ final class Containers
 		ItemID.LIMESTONEBRICK, ItemID.SOFTCLAY, ItemID.SWAMPPASTE, ItemID.TIMBERBEAM,
 	};
 
+	/** Held here because the slot numbers it learns are worth keeping for the whole session. */
+	private static final BoltPouch BOLT_POUCH = new BoltPouch();
+
 	static final List<Container> ALL = Collections.unmodifiableList(roster());
 
 	private static final Map<Integer, Container> BY_ITEM = byItem();
@@ -134,6 +137,11 @@ final class Containers
 		all.add(Container.varbits("plankSack", "Plank sack", Containers::readPlankSack,
 				ItemID.PLANK_SACK)
 			.holding(28)
+			.build());
+
+		all.add(Container.varbits("boltPouch", "Bolt pouch", BOLT_POUCH::read,
+				ItemID.XBOWS_BOLT_POUCH)
+			.iface(InterfaceID.XbowsPouch.CONTENT)
 			.build());
 
 		// Only listed in the chat when checked, so these are followed as well as they can be
@@ -258,13 +266,18 @@ final class Containers
 		return Collections.unmodifiableMap(byItem);
 	}
 
+	static BoltPouch boltPouch()
+	{
+		return BOLT_POUCH;
+	}
+
 	/** The container that item is, or null for an item that holds nothing. */
 	static Container of(int itemId)
 	{
 		return BY_ITEM.get(itemId);
 	}
 
-	private static void readRunePouch(net.runelite.api.Client client, Map<Integer, Integer> out)
+	private static boolean readRunePouch(net.runelite.api.Client client, Map<Integer, Integer> out)
 	{
 		for (int slot = 0; slot < RUNE_SLOTS.length; slot++)
 		{
@@ -277,9 +290,11 @@ final class Containers
 				out.merge(RUNES[rune - 1], amount, Integer::sum);
 			}
 		}
+
+		return true;
 	}
 
-	private static void readPlankSack(net.runelite.api.Client client, Map<Integer, Integer> out)
+	private static boolean readPlankSack(net.runelite.api.Client client, Map<Integer, Integer> out)
 	{
 		for (int kind = 0; kind < PLANK_COUNTS.length; kind++)
 		{
@@ -289,6 +304,8 @@ final class Containers
 				out.merge(PLANKS[kind], planks, Integer::sum);
 			}
 		}
+
+		return true;
 	}
 
 	private Containers()

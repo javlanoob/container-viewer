@@ -383,4 +383,16 @@ public interface ContainerViewerConfig extends Config
 	{
 		return true;
 	}
+
+	@ConfigItem(
+		keyName = "boltPouch",
+		name = "Bolt pouch",
+		description = "Bolt pouch. Open it once so the bolts can be named",
+		section = containersSection,
+		position = 126
+	)
+	default boolean boltPouch()
+	{
+		return true;
+	}
 }

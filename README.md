@@ -4,17 +4,20 @@ with a setting to turn each one on or off.
 
 Containers:
 - Looting bag, seed box, tackle box, forestry kit, huntsman's kit, Dizana's quiver, barbarian knapsack
-- Rune pouch (divine included), plank sack
+- Rune pouch (divine included), plank sack, bolt pouch
 - Herb sack (silklined included), gem bag, coal bag, fish barrel (fish sack barrel included),
   log basket, forestry basket, flamtaer bag, gem pouch and gem sack, essence pouches (small to
   colossal), hunter guild meat pouch, fur pouch and seed sack, scroll sack, forager's pouch,
   forestry clothes pouch, forestry cape pouch, Mastering Mixology secondary pouch
 
-The bolt pouch and the druid pouch are left out: the bolt pouch has its own interface and the client
-is never told which bolts are in which slot, and the druid pouch holds charges rather than items.
+The druid pouch is left out, since it holds charges rather than items.
 
 How much the client knows depends on the container:
 - The rune pouch and the plank sack are kept in varbits, so those are always exact.
+- The bolt pouch keeps an exact count per slot in varbits, but the client is never told which bolt a
+  slot holds, only a number of the game's own. Those numbers are learned from the pouch interface
+  the first time it is opened and then remembered, for every character, so after opening it once the
+  pouch is exact as well. Until then the hover asks you to open it.
 - The looting bag, seed box, tackle box, forestry kit, huntsman's kit, quiver and knapsack are sent
   to the client in full, so those are exact once the container has been opened once.
 - The rest are only listed in the chat when checked. Check one to load it, and it is then kept up to

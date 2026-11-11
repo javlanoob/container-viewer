@@ -47,6 +47,9 @@ public class ContainerViewerPlugin extends Plugin
 {
 	private static final String STORAGE_PREFIX = "contents_";
 
+	/** Where the bolt slot numbers the pouch has given away are kept. */
+	private static final String BOLT_SLOTS_KEY = "boltSlots";
+
 	/** Clicks on the container itself that move things rather than list them. */
 	private static final String FILL = "Fill";
 	private static final String EMPTY = "Empty";
@@ -118,6 +121,7 @@ public class ContainerViewerPlugin extends Plugin
 	protected void startUp()
 	{
 		overlayManager.add(overlay);
+		loadBoltSlots();
 		clientThread.invoke(() ->
 		{
 			if (client.getGameState() == GameState.LOGGED_IN)
@@ -418,6 +422,14 @@ public class ContainerViewerPlugin extends Plugin
 	{
 		int tick = client.getTickCount();
 
+		// The bolt pouch only says which bolt a slot holds while it is open
+		BoltPouch boltPouch = Containers.boltPouch();
+		if (boltPouch.isOpen(client) && boltPouch.learn(client))
+		{
+			saveBoltSlots();
+			overlay.invalidate();
+		}
+
 		if (reading != null && tick - readingTick >= LISTING_TICKS)
 		{
 			// A click that listed nothing leaves what we had rather than claiming it is empty
@@ -485,7 +497,11 @@ public class ContainerViewerPlugin extends Plugin
 		if (container.source == Container.Source.VARBITS)
 		{
 			items = new LinkedHashMap<>();
-			container.varbits.read(client, items);
+			if (!container.varbits.read(client, items))
+			{
+				// Part of it cannot be named yet, so say nothing rather than show a short list
+				return null;
+			}
 		}
 		else
 		{
@@ -719,6 +735,22 @@ public class ContainerViewerPlugin extends Plugin
 		return counts;
 	}
 
+	/**
+	 * The bolt slot numbers are the game's, not an account's, so they are kept outside the profile
+	 * and stay learned for every character.
+	 */
+	private void loadBoltSlots()
+	{
+		Containers.boltPouch().load(parse(
+			configManager.getConfiguration(ContainerViewerConfig.GROUP, BOLT_SLOTS_KEY)));
+	}
+
+	private void saveBoltSlots()
+	{
+		configManager.setConfiguration(ContainerViewerConfig.GROUP, BOLT_SLOTS_KEY,
+			serialize(Containers.boltPouch().learned()));
+	}
+
 	private void loadContents()
 	{
 		contents.clear();
@@ -747,8 +779,14 @@ public class ContainerViewerPlugin extends Plugin
 			return;
 		}
 
+		configManager.setRSProfileConfiguration(ContainerViewerConfig.GROUP,
+			STORAGE_PREFIX + container.key, serialize(held));
+	}
+
+	private static String serialize(Map<Integer, Integer> items)
+	{
 		StringBuilder sb = new StringBuilder();
-		for (Map.Entry<Integer, Integer> entry : held.entrySet())
+		for (Map.Entry<Integer, Integer> entry : items.entrySet())
 		{
 			if (sb.length() > 0)
 			{
@@ -756,8 +794,7 @@ public class ContainerViewerPlugin extends Plugin
 			}
 			sb.append(entry.getKey()).append(':').append(entry.getValue());
 		}
-		configManager.setRSProfileConfiguration(ContainerViewerConfig.GROUP,
-			STORAGE_PREFIX + container.key, sb.toString());
+		return sb.toString();
 	}
 
 	private static Map<Integer, Integer> parse(String value)
