@@ -226,12 +226,15 @@ class ContainerViewerOverlay extends Overlay
 		}
 		setPanelWidth(contentWidth);
 
+		// A container holds its items in one place whether or not they stack in the inventory, so
+		// the count is worth drawing on them too
+		boolean stackAll = config.stackItems();
 		grid.getChildren().clear();
 		for (Stack stack : stacks)
 		{
 			Item item = stack.item;
-			grid.getChildren().add(new ImageComponent(
-				itemManager.getImage(item.getId(), item.getQuantity(), stack.stackable)));
+			grid.getChildren().add(new ImageComponent(itemManager.getImage(
+				item.getId(), item.getQuantity(), stack.stackable || stackAll)));
 		}
 		panel.getChildren().add(grid);
 

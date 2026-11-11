@@ -31,5 +31,6 @@ Config options:
 - Show total value
 - Show high alch value
 - Sort by value
+- Stack identical items
 - Text color
 - One toggle per container

@@ -74,10 +74,21 @@ public interface ContainerViewerConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "stackItems",
+		name = "Stack identical items",
+		description = "Draw a count on items that do not stack in the inventory, instead of a bare icon",
+		position = 6
+	)
+	default boolean stackItems()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = "textColor",
 		name = "Text color",
 		description = "The color of the text below the icons",
-		position = 6
+		position = 7
 	)
 	default Color textColor()
 	{
